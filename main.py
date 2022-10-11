@@ -5,23 +5,19 @@
 # =============================================================================
 
 from random import randint
-import helpersrobotiqnew as helpers
+import helpers
 import os
 import numpy as np
 import cv2
-from robotiq_gripper_control import RobotiqGripper
 from datetime import datetime
-import math
 import zivid
 from datetime import timedelta
 import robotiq_gripper
 from threading import Thread
 import time
 
-# Transformation Matrix
+# Read Transformation Matrix
 M = helpers.read_transform("./robodk_hand_eye_calibration/datasets/handeye/2022-09-13_09-47-19/hand_eye_transform.yaml")
-
-
 
 
 # =============================================================================
@@ -108,7 +104,6 @@ def main_menu():
             print("Run bin picking program")
             canny_low = 50
             # Capture and save 3D and 2D frame
-            #background_img = cv2.imread("Organised/CapturedNew/Background_img.png")
             goal_positions, angles = helpers.find_goal_positions(app, settings, settings_2d, camera, M, canny_low)
             helpers.move_above_goal(helpers.home_pos, helpers.middle_pos, rtde_c)
             i = 0
@@ -198,14 +193,8 @@ def main_menu():
             helpers.pick_object(test_pos, rtde_c, rtde_r, gripper)
             helpers.bring_object_to_conveyor(helpers.middle_pos, helpers.home_pos, helpers.above_conveyor_pos, helpers.place_tube_pos, rtde_c, rtde_io)
         
-        # CHOICE 4: "Analyze picture."
-        elif choice == "ANALYZE PICTURE":
-            path = str(input("\nInsert path to picture here: ")) # e.g. Captured/Image_30_08_2022-03:19:03_PM.png
-            img = cv2.imread(path)
-            helpers.find_rectangles(img)
-            
 
-        # CHOICE 5: "Capture Frame."
+        # CHOICE 4: "Capture Frame."
         elif choice == "CAPTURE FRAME":
             frame_3D, image = helpers.capture_frame()
             date = datetime.now().strftime("%d_%m_%Y-%I:%M:%S_%p")
@@ -217,7 +206,7 @@ def main_menu():
             frame_3D.save(zdf_file)
             image = cv2.imread(image_file)
 
-        # CHOICE 6: "Exit."
+        # CHOICE 5: "Exit."
         elif choice== "EXIT":
             os.system('cls' if os.name=='nt' else 'clear')
             print("\n Exit program")
@@ -240,7 +229,6 @@ if __name__ == '__main__':
     print("\n   • RUN")
     print("\n   • WARM UP")
     print("\n   • TEST ROBOT")
-    print("\n   • ANALYZE PICTURE")
     print("\n   • CAPTURE FRAME")
     print("\n   • EXIT")
     # Display MAIN MENU

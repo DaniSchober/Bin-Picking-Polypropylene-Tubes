@@ -10,10 +10,8 @@ import rtde_control
 import rtde_receive
 from rtde_control import Path, PathEntry
 import rtde_io
-from robotiq_gripper_control import RobotiqGripper
 import copy
 import math
-from matplotlib import pyplot as plt
 import random
 from random import randint
 
@@ -58,33 +56,6 @@ place_tube_pos = [-0.09530795655436443,
 
 
 
-def find_rectangles(img, lowerThreshold = 70, upperThreshold = 200):
-    imgGry = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)  #convert image to grayscale
-    ret , thrash = cv2.threshold(imgGry, lowerThreshold , upperThreshold, cv2.CHAIN_APPROX_NONE) #apply threshold to get binary image
-    contours , hierarchy = cv2.findContours(thrash, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE) #find contours in the image
-    contours = sorted(contours, key = cv2.contourArea, reverse = True)[1:20] #get the 20 contours with the biggest area
-
-    for contour in contours:
-        approx = cv2.approxPolyDP(contour, 0.01* cv2.arcLength(contour, True), True)
-        x = approx.ravel()[0]
-        y = approx.ravel()[1] - 5
-        if len(approx) < 11 :
-            #cv2.drawContours(img, [approx], 0, (255, 100, 0), 5)
-            length_approx = str(len(approx))
-            rect = cv2.minAreaRect(contour)
-
-            #find center of the rectangle
-            center = rect[0]
-            img = cv2.circle(img, (int(center[0]),int(center[1])), radius=0, color=(0, 0, 255), thickness=10)
-            box = cv2.boxPoints(rect)
-            box = np.int0(box)
-            cv2.drawContours(img,[box],0,(0,0,255),2)
-    cv2.imshow('shapes', img)
-    cv2.waitKey(5000)
-    cv2.destroyAllWindows()
-    cv2.waitKey(1)
-
-
 def warm_up_camera(camera, mints = 10):
 
     warmup_time = timedelta(minutes = mints)
@@ -126,11 +97,7 @@ def warm_up_camera(camera, mints = 10):
 
 
 def capture_frame(app, settings, settings_2d, camera):
-
-    #print("Capturing frame")
     frame_3D = camera.capture(settings)
-    
-    #print("Capturing 2D frame")
     frame_2D = camera.capture(settings_2d)
     image = frame_2D.image_rgba()
 
@@ -146,17 +113,13 @@ def get_xyz_from_pixels(frame, pixel_x, pixel_y):
        xyz = point_cloud.copy_data("xyz")
 
     """
-    #with zivid.Application():
-        #frame = zivid.Frame(data_file)
     point_cloud = frame.point_cloud()
     matrix_xyz = point_cloud.copy_data("xyz")
     xyz = matrix_xyz[(pixel_y, pixel_x)]
     while math.isnan(xyz[1]):
-        #print("Output was nan")
         pixel_y += 1
         pixel_x += 1
         xyz = matrix_xyz[(pixel_y, pixel_x)]
-        #print("New output:", xyz)
     return xyz
 
 
@@ -169,7 +132,6 @@ def connect_robot(ip = "192.168.2.1"):
 def move_above_goal(home_pos, middle_pos, rtde_c, vel_J = 3, acc_J = 3):
     path = Path()
     blend = 0.1
-    #path.addEntry(PathEntry(PathEntry.MoveJ, PathEntry.PositionTcpPose, [home_pos[0], home_pos[1], home_pos[2], home_pos[3], home_pos[4], home_pos[5], vel_J, acc_J, blend]))
     path.addEntry(PathEntry(PathEntry.MoveJ, PathEntry.PositionTcpPose, [middle_pos[0], middle_pos[1], middle_pos[2], middle_pos[3], middle_pos[4], middle_pos[5],  vel_J, acc_J, blend]))
     rtde_c.movePath(path, False)
     return 0
@@ -186,12 +148,10 @@ def pick_object(pick_pos, rtde_c, rtde_r, gripper, angle = 0, vel_L = 3, acc_L =
         angle =  (angle - math.pi)
     if angle < (-math.pi/2):
         angle = (angle + math.pi)
-    #print("actual angle:", angle)
     actual_q[5] += angle # set angle around z axis to the determined angle in rad   
     rtde_c.moveJ(actual_q, speed = 3) 
     goal = rtde_r.getActualTCPPose() # get position at after rotation
     goal[2] -= 0.1 
-
     speed = [0, 0, -0.1, 0, 0, 0]
     rtde_c.moveUntilContact(speed)
 
@@ -202,7 +162,6 @@ def pick_object(pick_pos, rtde_c, rtde_r, gripper, angle = 0, vel_L = 3, acc_L =
     goal[2] += 0.2 
     rtde_c.moveL(goal, speed = 2, acceleration = 1) # move 10cm linear upwards after gripping
     if (gripper_position > 180):
-        #print("Gripper closed")
         gripper_closed = True
     else:
         gripper_closed = False
@@ -214,7 +173,6 @@ def bring_object_to_conveyor(middle_pos_high, home_pos, above_conveyor_pos, plac
     acc_J = 3
     path1 = Path()
     path1.addEntry(PathEntry(PathEntry.MoveJ, PathEntry.PositionTcpPose, [middle_pos_high[0], middle_pos_high[1], middle_pos_high[2], middle_pos_high[3], middle_pos_high[4], middle_pos_high[5],  vel_J, acc_J, blend]))
-    #path1.addEntry(PathEntry(PathEntry.MoveJ, PathEntry.PositionTcpPose, [home_pos[0], home_pos[1], home_pos[2], home_pos[3], home_pos[4], home_pos[5], vel_J, acc_J, 0.08]))
     path1.addEntry(PathEntry(PathEntry.MoveJ, PathEntry.PositionTcpPose, [above_conveyor_pos[0], above_conveyor_pos[1], above_conveyor_pos[2], above_conveyor_pos[3], above_conveyor_pos[4], above_conveyor_pos[5], vel_J, acc_J, blend]))
     path1.addEntry(PathEntry(PathEntry.MoveJ, PathEntry.PositionTcpPose, [place_tube_pos[0], place_tube_pos[1], place_tube_pos[2], place_tube_pos[3], place_tube_pos[4], place_tube_pos[5], vel_J, acc_J, 0.0]))
     rtde_c.movePath(path1, False)
@@ -263,9 +221,7 @@ def find_gripping_points1(img):
         contours = sorted(contours, key = cv2.contourArea, reverse = True)[1:100] #get the 60 contours with the biggest area
         np.random.shuffle(contours)
         for contour in contours:
-            #print(contour)
             approx = cv2.approxPolyDP(contour, 0.01* cv2.arcLength(contour, True), True)
-            #print(len(approx))
 
             if 6 < len(approx) < 30 :
                 
@@ -308,8 +264,7 @@ def find_gripping_points1(img):
         iter_out += 1
 
     date = datetime.now().strftime("%d_%m_%Y-%I:%M:%S_%p")
-    image_file = "Organised/CapturedNew/Result_Alg1_" + date + ".png"
-    #print(f"Saving output image: {image_file}")
+    image_file = "Captured/Result_Alg1_" + date + ".png"
     cv2.imwrite(image_file, img_res)
 
     return gripping_points
@@ -342,9 +297,7 @@ def find_gripping_points2(img):
         contours = sorted(contours, key = cv2.contourArea, reverse = True)[1:200] #get the 60 contours with the biggest area
         np.random.shuffle(contours)
         for contour in contours:
-            #print(contour)
             approx = cv2.approxPolyDP(contour, 0.01* cv2.arcLength(contour, True), True)
-            #print(len(approx))
 
             if len(approx) < 25 :
                 
@@ -387,8 +340,7 @@ def find_gripping_points2(img):
         iter_out += 1
 
     date = datetime.now().strftime("%d_%m_%Y-%I:%M:%S_%p")
-    image_file = "Organised/CapturedNew/Result_Alg2_" + date + ".png"
-    #print(f"Saving output image: {image_file}")
+    image_file = "Captured/Result_Alg2_" + date + ".png"
     cv2.imwrite(image_file, img_res)
 
     return gripping_points
@@ -415,7 +367,6 @@ def randomize(rtde_c, rtde_r, gripper):
     rtde_c.moveL(goal)
 
     goal = rtde_r.getActualTCPPose() 
-    #goal[0] = 0.1
     goal[1] -= 0.1 + 0.1*random.randint(0, 1)
     rtde_c.moveL(goal)
 
@@ -440,16 +391,13 @@ def randomize(rtde_c, rtde_r, gripper):
 def find_goal_positions(app, settings, settings_2d, camera, M, canny_low):
     frame_3D, image = capture_frame(app, settings, settings_2d, camera)
     date = datetime.now().strftime("%d_%m_%Y-%I:%M:%S_%p")
-    image_file = "Organised/CapturedNew/Image_" + date + ".png"
-    #print(f"Saving 2D color image to file: {image_file}")
+    image_file = "Captured/Image_" + date + ".png"
     image.save(image_file)
     image = cv2.imread(image_file)
 
     # Analyse 2D image to find gripping point
     functions_analyse = [find_gripping_points1(image), find_gripping_points2(image)]
     gripping_points = random.choice(functions_analyse)
-    #gripping_points = find_gripping_points1(image)
-    #print("Gripping_points:", gripping_points)
     
     goal_positions = np.empty([0,6])
     angles = np.array([])
