@@ -1,8 +1,8 @@
 # Bin Picking of transparent medical grade polypropylene tubes
 
-Bin picking project of laboratory tubes.
-
 This project was proposed by Novo Nordisk (site Måløv), and carried out as a special course at the Technical University of Denmark. The planned system consists of two main parts: A tube picking and placing unit, and a tube labeling unit.
+
+The project is a solution for autonomous random bin-picking of plastic centrifuge tubes of 50ml. A UR5e arm in combination with a Robotiq Hand-E Adaptive Gripper is used for the picking process. With small adjustments in the code, a usage of a suction or a vacuum gripper would also be possible.
 
 ## Getting Started
 To run the bin-picking solution, the following requirements are needed:  
@@ -18,3 +18,11 @@ To run the bin-picking solution, the following requirements are needed:
 pip install requirements.txt
 ```
 Install the SDU RTDE interface.
+
+## Usage
+* Connect camera and UR5e to your computer and specify the IP address
+* Run ```main.py```
+* Select your desired operation as explained in the UI
+
+## Contact
+Daniel Schober - s212599@dtu.dk
