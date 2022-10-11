@@ -13,6 +13,7 @@ To run the bin-picking solution, the following requirements are needed:
 * a Robotiq Hand-E Adaptive Gripper
 * a table to mount the robot and place the tubes
 
+#### Exemplary Setup
 ![Image](https://user-images.githubusercontent.com/75242605/195185081-233d701e-4854-48fb-bbd9-c5dbc46e0c29.jpeg)
 
 ### Installation
@@ -27,6 +28,10 @@ Install the SDU RTDE interface.
 * Perform the hand-eye-calibration as explained in robodk_hand_eye_calibration
 * Run ```main.py```
 * Select your desired operation as explained in the UI
+
+## Exemplary Usage
+https://user-images.githubusercontent.com/75242605/195187740-261783ca-15ac-4d67-9e54-92b3190dc710.mp4
+
 
 ## Contact
 Daniel Schober - s212599@dtu.dk
