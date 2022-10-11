@@ -14,3 +14,7 @@ To run the bin-picking solution, the following requirements are needed:
 * a table to mount the robot and place the tubes
 
 ### Installation
+```python
+pip install requirements.txt
+```
+Install the SDU RTDE interface.
