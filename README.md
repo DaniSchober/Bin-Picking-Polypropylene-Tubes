@@ -21,6 +21,7 @@ Install the SDU RTDE interface.
 
 ## Usage
 * Connect camera and UR5e to your computer and specify the IP address
+* Perform the hand-eye-calibration as explained in robodk_hand_eye_calibration
 * Run ```main.py```
 * Select your desired operation as explained in the UI
 
