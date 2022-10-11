@@ -13,11 +13,14 @@ To run the bin-picking solution, the following requirements are needed:
 * a Robotiq Hand-E Adaptive Gripper
 * a table to mount the robot and place the tubes
 
+![Image](https://user-images.githubusercontent.com/75242605/195185081-233d701e-4854-48fb-bbd9-c5dbc46e0c29.jpeg)
+
 ### Installation
 ```python
 pip install requirements.txt
 ```
 Install the SDU RTDE interface.
+
 
 ## Usage
 * Connect camera and UR5e to your computer and specify the IP address
